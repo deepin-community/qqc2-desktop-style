@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.16)
 
-set(KF_VERSION "5.86.0") # handled by release scripts
-set(KF_DEP_VERSION "5.86.0") # handled by release scripts
+set(KF_VERSION "5.90.0") # handled by release scripts
+set(KF_DEP_VERSION "5.90.0") # handled by release scripts
 
 project(qqc2-desktop-style VERSION ${KF_VERSION})
 
@@ -21,13 +21,14 @@ include(FeatureSummary)
 
 ################# set KDE specific information #################
 
-find_package(ECM 5.86.0 REQUIRED NO_MODULE)
+find_package(ECM 5.90.0 REQUIRED NO_MODULE)
 
 # where to look first for cmake modules, before ${CMAKE_ROOT}/Modules/ is checked
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${ECM_MODULE_PATH})
 
 include(ECMSetupVersion)
 include(ECMGenerateHeaders)
+include(ECMQMLModules)
 include(KDEInstallDirs)
 include(KDECMakeSettings)
 include(KDEGitCommitHooks)
@@ -94,6 +95,8 @@ configure_package_config_file(
   INSTALL_DESTINATION  ${CMAKECONFIG_INSTALL_DIR}
   PATH_VARS  CMAKE_INSTALL_PREFIX
 )
+
+ecm_find_qmlmodule(org.kde.sonnet 1.0)
 
 install(FILES
   "${CMAKE_CURRENT_BINARY_DIR}/KF5QQC2DeskopStyleConfig.cmake"

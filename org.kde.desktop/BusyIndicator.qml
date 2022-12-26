@@ -13,7 +13,6 @@ import QtQuick.Templates @QQC2_VERSION@ as T
 T.BusyIndicator {
     id: controlRoot
 
-    palette: Kirigami.Theme.palette
     implicitWidth: contentItem.implicitWidth + leftPadding + rightPadding
     implicitHeight: contentItem.implicitHeight + topPadding + bottomPadding
 
@@ -23,7 +22,7 @@ T.BusyIndicator {
     hoverEnabled: true
 
     contentItem: Kirigami.Icon {
-        source: "view-refresh"
+        source: "process-working-symbolic"
         opacity: controlRoot.running ? 1 : 0
         smooth: true
 

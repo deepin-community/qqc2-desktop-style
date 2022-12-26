@@ -13,16 +13,17 @@ import org.kde.kirigami 2.4 as Kirigami
 T.Button {
     id: controlRoot
 
-    palette: Kirigami.Theme.palette
     Kirigami.Theme.colorSet: Kirigami.Theme.Button
     Kirigami.Theme.inherit: false
 
-    implicitWidth: background.implicitWidth
-    implicitHeight: background.implicitHeight
+    implicitWidth: Math.max((text && display !== T.AbstractButton.IconOnly ?
+        implicitBackgroundWidth : implicitHeight) + leftInset + rightInset,
+        implicitContentWidth + leftPadding + rightPadding)
+    implicitHeight: Math.max(implicitBackgroundHeight + topInset + bottomInset,
+                             implicitContentHeight + topPadding + bottomPadding)
 
     hoverEnabled: Qt.styleHints.useHoverEffects
 
-    contentItem: Item {}
     Kirigami.MnemonicData.enabled: controlRoot.enabled && controlRoot.visible
     Kirigami.MnemonicData.controlType: Kirigami.MnemonicData.ActionElement
     Kirigami.MnemonicData.label: controlRoot.display !== T.AbstractButton.IconOnly ? controlRoot.text : ""
@@ -33,8 +34,6 @@ T.Button {
         onActivated: controlRoot.clicked()
     }
     background: StylePrivate.StyleItem {
-        id: styleitem
-        anchors.fill: parent
         control: controlRoot
         elementType: "button"
         sunken: controlRoot.down
@@ -43,7 +42,7 @@ T.Button {
         hover: controlRoot.hovered
         text: controlRoot.Kirigami.MnemonicData.mnemonicLabel
         hasFocus: controlRoot.activeFocus || controlRoot.highlighted
-        activeControl: controlRoot.isDefault ? "default" : "f"
+        activeControl: controlRoot.Accessible.defaultButton ? "default" : "f"
         properties: {
             "icon": controlRoot.icon && controlRoot.display !== T.AbstractButton.TextOnly ? (controlRoot.icon.name || controlRoot.icon.source) : "",
             "iconColor": controlRoot.icon && controlRoot.icon.color.a > 0? controlRoot.icon.color : Kirigami.Theme.textColor,

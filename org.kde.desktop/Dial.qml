@@ -15,12 +15,10 @@ import org.kde.qqc2desktopstyle.private 1.0 as StylePrivate
 T.Dial {
     id: controlRoot
 
-    palette: Kirigami.Theme.palette
     implicitWidth: 128
     implicitHeight: 128
 
     background: StylePrivate.StyleItem {
-        id: style
         control: controlRoot
         visible: true
         elementType: "dial"

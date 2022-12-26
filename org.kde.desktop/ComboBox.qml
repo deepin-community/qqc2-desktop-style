@@ -17,7 +17,6 @@ import "private" as Private
 
 T.ComboBox {
     id: controlRoot
-    palette: Kirigami.Theme.palette
     //NOTE: typeof necessary to not have warnings on Qt 5.7
     Kirigami.Theme.colorSet: typeof(editable) != "undefined" && editable ? Kirigami.Theme.View : Kirigami.Theme.Button
     Kirigami.Theme.inherit: false
@@ -43,7 +42,6 @@ T.ComboBox {
     indicator: Item {}
 
     contentItem: T.TextField {
-        id: textField
         padding: 0
         text: controlRoot.editable ? controlRoot.editText : controlRoot.displayText
 
@@ -92,12 +90,12 @@ T.ComboBox {
     Component {
         id: mobileCursor
         Private.MobileCursor {
-            target: textField
+            target: controlRoot.contentItem
         }
     }
 
     Private.MobileCursor {
-        target: textField
+        target: controlRoot.contentItem
         selectionStartHandle: true
         property var rect: target.positionToRectangle(target.selectionStart)
         x: rect.x + 5

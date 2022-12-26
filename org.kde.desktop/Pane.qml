@@ -1,34 +1,23 @@
-/*
-    SPDX-FileCopyrightText: 2021 Carson Black <uhhadd@gmail.com>
+// SPDX-FileCopyrightText: 2021 Carl Schwan <carl@carlschwan.eu>
+// SPDX-License-Identifier: LGPL-2.0-or-later
 
-    SPDX-License-Identifier: LGPL-3.0-only OR GPL-2.0-or-later
-*/
-
-
-import QtQuick 2.6
-import QtQuick.Layouts 1.2
+import QtQuick 2.12
 import QtQuick.Templates @QQC2_VERSION@ as T
-import org.kde.kirigami 2.4 as Kirigami
+import QtQuick.Controls 2.12
+import org.kde.kirigami 2.15 as Kirigami
 
-T.MenuBar {
-    id: controlRoot
+T.Pane {
+    id: control
 
     implicitWidth: Math.max(implicitBackgroundWidth + leftInset + rightInset,
                             contentWidth + leftPadding + rightPadding)
     implicitHeight: Math.max(implicitBackgroundHeight + topInset + bottomInset,
                              contentHeight + topPadding + bottomPadding)
 
-    delegate: MenuBarItem {
-    }
-
-    contentItem: Row {
-        spacing: controlRoot.spacing
-        Repeater {
-            model: controlRoot.contentModel
-        }
-    }
+    padding: Kirigami.Units.largeSpacing
 
     background: Rectangle {
         color: Kirigami.Theme.backgroundColor
     }
 }
+

@@ -14,7 +14,6 @@ import org.kde.kirigami 2.4 as Kirigami
 T.MenuItem {
     id: controlRoot
 
-    palette: Kirigami.Theme.palette
     implicitWidth: Math.max(background ? background.implicitWidth : 0,
                             contentItem.implicitWidth + leftPadding + rightPadding + (arrow ? arrow.implicitWidth : 0))
     implicitHeight: visible ? Math.max(background ? background.implicitHeight : 0,
@@ -95,7 +94,6 @@ T.MenuItem {
         x: controlRoot.mirrored ? controlRoot.padding : controlRoot.width - width - controlRoot.padding
         y: controlRoot.topPadding + (controlRoot.availableHeight - height) / 2
         source: controlRoot.mirrored ? "go-next-symbolic-rtl" : "go-next-symbolic"
-        selected: controlRoot.highlighted
         width: Math.max(Kirigami.Units.iconSizes.roundedIconSize(label.height), Kirigami.Units.iconSizes.small)
         height: width
         visible: controlRoot.subMenu
