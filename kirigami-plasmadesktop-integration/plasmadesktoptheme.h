@@ -7,7 +7,8 @@
 #ifndef KIRIGAMIPLASMATHEME_H
 #define KIRIGAMIPLASMATHEME_H
 
-#include <Kirigami2/PlatformTheme>
+#include <Kirigami/PlatformTheme>
+
 #include <QColor>
 #include <QIcon>
 #include <QObject>
@@ -33,9 +34,6 @@ public:
 
 protected:
     bool event(QEvent *event) override;
-
-protected Q_SLOTS:
-    void syncFont();
 
 private:
     friend class StyleSingleton;

@@ -1,25 +1,27 @@
 /*
     SPDX-FileCopyrightText: 2017 Marco Martin <mart@kde.org>
     SPDX-FileCopyrightText: 2017 The Qt Company Ltd.
+    SPDX-FileCopyrightText: 2023 ivan tkachenko <me@ratijas.tk>
 
     SPDX-License-Identifier: LGPL-3.0-only OR GPL-2.0-or-later
 */
 
 
 import QtQuick 2.6
-import QtQuick.Templates @QQC2_VERSION@ as T
-import QtQuick.Controls @QQC2_VERSION@
+import QtQuick.Templates 2.15 as T
+import QtQuick.Controls 2.15
 import org.kde.kirigami 2.4 as Kirigami
 import "private"
 
 T.CheckBox {
     id: controlRoot
 
-    implicitWidth: Math.max(background ? background.implicitWidth : 0,
-                            contentItem.implicitWidth + leftPadding + rightPadding)
-    implicitHeight: Math.max(background ? background.implicitHeight : 0,
-                             Math.max(contentItem.implicitHeight,
-                                      indicator ? indicator.implicitHeight : 0) + topPadding + bottomPadding)
+    implicitWidth: Math.max(implicitBackgroundWidth + leftInset + rightInset,
+                            implicitContentWidth + leftPadding + rightPadding,
+                            implicitIndicatorWidth + leftPadding + rightPadding)
+    implicitHeight: Math.max(implicitBackgroundHeight + topInset + bottomInset,
+                             implicitContentHeight + topPadding + bottomPadding,
+                             implicitIndicatorHeight + topPadding + bottomPadding)
     baselineOffset: contentItem.y + contentItem.baselineOffset
 
     spacing: indicator && typeof indicator.pixelMetric === "function" ? indicator.pixelMetric("checkboxlabelspacing") : Kirigami.Units.smallSpacing
@@ -27,11 +29,18 @@ T.CheckBox {
     hoverEnabled: true
 
     indicator: CheckIndicator {
-        LayoutMirroring.enabled: controlRoot.mirrored
-        LayoutMirroring.childrenInherit: true
-        anchors {
-            left: parent.left
-            verticalCenter: parent.verticalCenter
+        x: if (control.contentItem !== null && control.contentItem.width > 0) {
+            return control.mirrored ?
+                control.width - width - control.rightPadding : control.leftPadding
+        } else {
+            return control.leftPadding + (control.availableWidth - width) / 2
+        }
+        y: if (control.contentItem !== null
+            && (control.contentItem instanceof Text || control.contentItem instanceof TextEdit)
+            && control.contentItem.lineCount > 1) {
+            return control.topPadding
+        } else {
+            return control.topPadding + Math.round((control.availableHeight - height) / 2)
         }
         control: controlRoot
     }
@@ -47,9 +56,19 @@ T.CheckBox {
     }
 
     contentItem: Label {
-        readonly property int indicatorEffectiveWidth: controlRoot.indicator && typeof controlRoot.indicator.pixelMetric === "function" && controlRoot.icon.name == "" && controlRoot.icon.source == ""
-            ? controlRoot.indicator.pixelMetric("indicatorwidth") + controlRoot.spacing : controlRoot.indicator.width
+        readonly property int indicatorEffectiveWidth: (
+                controlRoot.indicator
+                && typeof controlRoot.indicator.pixelMetric === "function"
+                && controlRoot.icon.name === ""
+                && controlRoot.icon.source.toString() === ""
+            ) ? controlRoot.indicator.pixelMetric("indicatorwidth") + controlRoot.spacing
+              : controlRoot.indicator.width
 
+        property FontMetrics fontMetrics: FontMetrics {}
+        // Ensure consistent vertical position relative to indicator with multiple lines.
+        // No need to round because .5 from the top will add with .5 from the bottom becoming 1.
+        topPadding: Math.max(0, (controlRoot.implicitIndicatorHeight - fontMetrics.height) / 2)
+        bottomPadding: topPadding
         leftPadding: controlRoot.indicator && !controlRoot.mirrored ? indicatorEffectiveWidth : 0
         rightPadding: controlRoot.indicator && controlRoot.mirrored ? indicatorEffectiveWidth : 0
         opacity: controlRoot.enabled ? 1 : 0.6
@@ -59,14 +78,15 @@ T.CheckBox {
         visible: controlRoot.text
         horizontalAlignment: Text.AlignLeft
         verticalAlignment: Text.AlignVCenter
+        wrapMode: Text.Wrap
 
         FocusRect {
             control: controlRoot
 
             anchors {
-                leftMargin: (controlRoot.mirrored ? parent.rightPadding : parent.leftPadding ) - Kirigami.Units.smallSpacing / 2
-                left: parent.left
+                leftMargin: (controlRoot.mirrored ? parent.rightPadding : parent.leftPadding) - Kirigami.Units.smallSpacing / 2
                 top: parent.top
+                left: parent.left
                 bottom: parent.bottom
                 topMargin: parent.topPadding - 1
                 bottomMargin: parent.bottomPadding - 1

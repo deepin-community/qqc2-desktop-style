@@ -7,19 +7,21 @@
 
 import QtQuick 2.6
 import QtQuick.Layouts 1.2
-import QtQuick.Templates @QQC2_VERSION@ as T
+import QtQuick.Templates 2.15 as T
 import org.kde.kirigami 2.4 as Kirigami
 
 T.MenuBar {
     id: controlRoot
+
+    Kirigami.Theme.colorSet: Kirigami.Theme.Header
+    Kirigami.Theme.inherit: false
 
     implicitWidth: Math.max(implicitBackgroundWidth + leftInset + rightInset,
                             contentWidth + leftPadding + rightPadding)
     implicitHeight: Math.max(implicitBackgroundHeight + topInset + bottomInset,
                              contentHeight + topPadding + bottomPadding)
 
-    delegate: MenuBarItem {
-    }
+    delegate: MenuBarItem {}
 
     contentItem: Row {
         spacing: controlRoot.spacing

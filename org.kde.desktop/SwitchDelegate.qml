@@ -8,7 +8,7 @@
 
 import QtQuick 2.5
 import org.kde.kirigami 2.4 as Kirigami
-import QtQuick.Templates @QQC2_VERSION@ as T
+import QtQuick.Templates 2.15 as T
 import "private"
 
 T.SwitchDelegate {
@@ -16,15 +16,14 @@ T.SwitchDelegate {
 
     implicitWidth: contentItem.implicitWidth + leftPadding + rightPadding
     implicitHeight: Math.max(contentItem.implicitHeight,
-                                      indicator ? indicator.implicitHeight : 0) + topPadding + bottomPadding
+                             indicator ? indicator.implicitHeight : 0) + topPadding + bottomPadding
     hoverEnabled: true
 
     padding: Kirigami.Settings.tabletMode ? Kirigami.Units.largeSpacing : Kirigami.Units.smallSpacing
 
-    leftPadding: padding*2
     topPadding: padding
-
-    rightPadding: padding*2
+    leftPadding: padding * 2
+    rightPadding: padding * 2
     bottomPadding: padding
 
     contentItem: Label {
@@ -43,9 +42,10 @@ T.SwitchDelegate {
     indicator: SwitchIndicator {
         x: controlRoot.mirrored ? controlRoot.leftPadding : controlRoot.width - width - controlRoot.rightPadding
         y: controlRoot.topPadding + (controlRoot.availableHeight - height) / 2
-
         control: controlRoot
     }
 
-    background: DefaultListItemBackground {}
+    background: DefaultListItemBackground {
+        control: controlRoot
+    }
 }

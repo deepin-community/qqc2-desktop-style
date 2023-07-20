@@ -1,13 +1,14 @@
 /*
     SPDX-FileCopyrightText: 2017 Marco Martin <mart@kde.org>
     SPDX-FileCopyrightText: 2017 The Qt Company Ltd.
+    SPDX-FileCopyrightText: 2023 ivan tkachenko <me@ratijas.tk>
 
     SPDX-License-Identifier: LGPL-3.0-only OR GPL-2.0-or-later
 */
 
 
 import QtQuick 2.6
-import QtQuick.Templates @QQC2_VERSION@ as T
+import QtQuick.Templates 2.15 as T
 import org.kde.kirigami 2.4 as Kirigami
 import org.kde.qqc2desktopstyle.private 1.0 as StylePrivate
 
@@ -48,30 +49,45 @@ T.ToolButton {
         hover: controlRoot.hovered
         text: controlRoot.Kirigami.MnemonicData.mnemonicLabel
         hasFocus: controlRoot.visualFocus || (!controlRoot.flat && controlRoot.pressed) || controlRoot.highlighted
-        activeControl: controlRoot.isDefault ? "default" : "f"
         flat: controlRoot.flat
 
-        // Set this to true to have the style render a menu arrow for the
-        // ToolButton.
-        // Note: If you use this, ensure you check whether your background item
+        // Set this to true or set `Accessible.role: Accessible.ButtonMenu`
+        // to have the style render a menu arrow for the ToolButton.
+        // Note: If you use this directly, ensure you check whether your background item
         // has this property at all, otherwise things will break with different
         // QtQuick styles!
-        property bool showMenuArrow: false
+        // TODO KF6: remove
+        property bool showMenuArrow: controlRoot.Accessible.role === Accessible.ButtonMenu
+
+        // note: keep in sync with DelayButton
+        readonly property int toolButtonStyle: {
+            switch (controlRoot.display) {
+            case T.AbstractButton.IconOnly: return Qt.ToolButtonIconOnly;
+            case T.AbstractButton.TextOnly: return Qt.ToolButtonTextOnly;
+            case T.AbstractButton.TextBesideIcon:
+            case T.AbstractButton.TextUnderIcon:
+                // TODO KF6: check if this condition is still needed
+                if (controlRoot.icon.name !== "" || controlRoot.icon.source.toString() !== "") {
+                    // has icon
+                    switch (controlRoot.display) {
+                        case T.AbstractButton.TextBesideIcon: return Qt.ToolButtonTextBesideIcon;
+                        case T.AbstractButton.TextUnderIcon: return Qt.ToolButtonTextUnderIcon;
+                    }
+                } else {
+                    return Qt.ToolButtonTextOnly;
+                }
+            default: return Qt.ToolButtonFollowStyle;
+            }
+        }
 
         properties: {
-            "icon": controlRoot.icon ? (controlRoot.icon.name || controlRoot.icon.source) : "",
-            "iconColor": controlRoot.icon && controlRoot.icon.color.a > 0? controlRoot.icon.color : Kirigami.Theme.textColor,
-            "iconWidth": controlRoot.icon ? controlRoot.icon.width : 0,
-            "iconHeight": controlRoot.icon ? controlRoot.icon.height : 0,
+            "icon": controlRoot.icon.name !== "" ? controlRoot.icon.name : controlRoot.icon.source,
+            "iconColor": Qt.colorEqual(controlRoot.icon.color, "transparent") ? Kirigami.Theme.textColor : controlRoot.icon.color,
+            "iconWidth": controlRoot.icon.width,
+            "iconHeight": controlRoot.icon.height,
+
             "menu": showMenuArrow,
-            "toolButtonStyle": controlRoot.display == T.ToolButton.IconOnly
-                                ? Qt.ToolButtonIconOnly :
-                               controlRoot.display == T.ToolButton.TextOnly
-                                ? Qt.ToolButtonTextOnly :
-                               controlRoot.display == T.ToolButton.TextBesideIcon
-                                ? Qt.ToolButtonTextBesideIcon :
-                               controlRoot.display == T.ToolButton.TextUnderIcon
-                                ? Qt.ToolButtonTextUnderIcon : Qt.ToolButtonFollowStyle
+            "toolButtonStyle": toolButtonStyle,
         }
     }
 }

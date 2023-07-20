@@ -7,7 +7,7 @@
 
 
 import QtQuick 2.6
-import QtQuick.Templates @QQC2_VERSION@ as T
+import QtQuick.Templates 2.15 as T
 import org.kde.kirigami 2.4 as Kirigami
 
 T.DialogButtonBox {
@@ -28,7 +28,7 @@ T.DialogButtonBox {
             implicitWidth,
             // Divide availableWidth (width - leftPadding - rightPadding) by the number of buttons,
             // then subtract the spacing between each button.
-            (control.availableWidth / control.count) - (control.spacing * (control.count-1))
+            (control.availableWidth / control.count) - (control.spacing * (control.count - 1))
         ))
         Kirigami.MnemonicData.controlType: Kirigami.MnemonicData.DialogButton
     }
@@ -53,9 +53,8 @@ T.DialogButtonBox {
         // If no such button exists, it returns nullptr.
         // Icon names are copied from KStyle::standardIcon()
         function setStandardIcon(buttonType, iconName) {
-            let button = standardButton(buttonType)
-            // For some reason, `== ""` works, but `=== ""` and `!name && !source` doesn't.
-            if (button && button.icon.name == "" && button.icon.source == "") { 
+            const button = standardButton(buttonType)
+            if (button && button.icon.name === "" && button.icon.source.toString() === "") {
                 button.icon.name = iconName
             }
         }

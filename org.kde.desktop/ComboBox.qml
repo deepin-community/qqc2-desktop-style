@@ -8,8 +8,8 @@
 
 import QtQuick 2.6
 import QtQuick.Window 2.2
-import QtQuick.Templates @QQC2_VERSION@ as T
-import QtQuick.Controls @QQC2_VERSION@ as Controls
+import QtQuick.Templates 2.15 as T
+import QtQuick.Controls 2.15 as Controls
 import org.kde.qqc2desktopstyle.private 1.0 as StylePrivate
 import org.kde.kirigami 2.12 as Kirigami
 
@@ -17,21 +17,23 @@ import "private" as Private
 
 T.ComboBox {
     id: controlRoot
-    //NOTE: typeof necessary to not have warnings on Qt 5.7
-    Kirigami.Theme.colorSet: typeof(editable) != "undefined" && editable ? Kirigami.Theme.View : Kirigami.Theme.Button
+
+    Kirigami.Theme.colorSet: editable ? Kirigami.Theme.View : Kirigami.Theme.Button
     Kirigami.Theme.inherit: false
 
-    implicitWidth: Math.max(200, background.implicitWidth + leftPadding + rightPadding)
+    implicitWidth: background.implicitWidth
     implicitHeight: background.implicitHeight
     baselineOffset: contentItem.y + contentItem.baselineOffset
 
     hoverEnabled: true
+    wheelEnabled: true
+
     padding: 5
-    leftPadding: controlRoot.editable && controlRoot.mirrored ? 24 : padding
-    rightPadding: controlRoot.editable && !controlRoot.mirrored ? 24 : padding
+    leftPadding: editable && mirrored ? 24 : padding
+    rightPadding: editable && !mirrored ? 24 : padding
 
     delegate: ItemDelegate {
-        width: listView.width
+        width: ListView.view.width
         text: controlRoot.textRole ? (Array.isArray(controlRoot.model) ? modelData[controlRoot.textRole] : model[controlRoot.textRole]) : modelData
         highlighted: controlRoot.highlightedIndex == index
         property bool separatorVisible: false
@@ -41,6 +43,20 @@ T.ComboBox {
 
     indicator: Item {}
 
+    /* ensure that the combobox and its popup have enough width for all of its items
+     * TODO remove for KF6 because it is fixed by Qt6 */
+    onCountChanged: {
+        let maxWidth = 75
+        for (let i = 0; i < count; ++i) {
+            maxWidth = Math.max(maxWidth, fontMetrics.boundingRect(controlRoot.textAt(i)).width)
+        }
+        styleitem.contentWidth = maxWidth
+    }
+
+    FontMetrics {
+        id: fontMetrics
+    }
+
     contentItem: T.TextField {
         padding: 0
         text: controlRoot.editable ? controlRoot.editText : controlRoot.displayText
@@ -49,7 +65,7 @@ T.ComboBox {
         autoScroll: controlRoot.editable
         readOnly: controlRoot.down
 
-        visible: typeof(controlRoot.editable) != "undefined" && controlRoot.editable
+        visible: controlRoot.editable
         inputMethodHints: controlRoot.inputMethodHints
         validator: controlRoot.validator
 
@@ -70,7 +86,7 @@ T.ComboBox {
 
         onFocusChanged: {
             if (focus) {
-                Private.MobileTextActionsToolBar.controlRoot = textField;
+                Private.MobileTextActionsToolBar.controlRoot = this;
             }
         }
 
@@ -97,7 +113,7 @@ T.ComboBox {
     Private.MobileCursor {
         target: controlRoot.contentItem
         selectionStartHandle: true
-        property var rect: target.positionToRectangle(target.selectionStart)
+        readonly property rect rect: target.positionToRectangle(target.selectionStart)
         x: rect.x + 5
         y: rect.y + 6
     }
@@ -115,40 +131,13 @@ T.ComboBox {
         contentHeight: Math.max(Math.ceil(textHeight("")), 14) + 2
         text: controlRoot.displayText
         properties: {
-            "editable" : control.editable
-        }
-
-        MouseArea {
-            property int wheelDelta: 0
-
-            anchors {
-                fill: parent
-                leftMargin: controlRoot.leftPadding
-                rightMargin: controlRoot.rightPadding
-            }
-
-            acceptedButtons: Qt.NoButton
-
-            onWheel: {
-                var delta = wheel.angleDelta.y || wheel.angleDelta.x
-                wheelDelta += delta;
-                // magic number 120 for common "one click"
-                // See: https://doc.qt.io/qt-5/qml-qtquick-wheelevent.html#angleDelta-prop
-                while (wheelDelta >= 120) {
-                    wheelDelta -= 120;
-                    controlRoot.decrementCurrentIndex();
-                }
-                while (wheelDelta <= -120) {
-                    wheelDelta += 120;
-                    controlRoot.incrementCurrentIndex();
-                }
-            }
+            "editable": control.editable
         }
     }
 
     popup: T.Popup {
         y: controlRoot.height
-        width: Math.max(controlRoot.width, 150)
+        width: controlRoot.width
         implicitHeight: contentItem.implicitHeight
         topMargin: 6
         bottomMargin: 6

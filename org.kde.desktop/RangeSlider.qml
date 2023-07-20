@@ -7,8 +7,8 @@
 
 
 import QtQuick 2.6
-import QtQuick.Controls @QQC2_VERSION@
-import QtQuick.Templates @QQC2_VERSION@ as T
+import QtQuick.Controls 2.15
+import QtQuick.Templates 2.15 as T
 import org.kde.kirigami 2.4 as Kirigami
 
 T.RangeSlider {
@@ -71,7 +71,7 @@ T.RangeSlider {
         implicitHeight: horizontal ? 6 : 200
         width: horizontal ? control.availableWidth : implicitWidth
         height: horizontal ? implicitHeight : control.availableHeight
-        radius: Math.round(Math.min(width/2, height/2))
+        radius: Math.round(Math.min(width / 2, height / 2))
         property color bgColor: Kirigami.Theme.textColor
         color: Qt.rgba(bgColor.r, bgColor.g, bgColor.b, 0.3)
         anchors.centerIn: parent

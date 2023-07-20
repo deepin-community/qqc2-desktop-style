@@ -7,17 +7,17 @@ Uploaders: Aurélien COUDERC <coucouf@debian.org>,
 Build-Depends: cmake (>= 3.16~),
                dbus-x11,
                debhelper-compat (= 13),
-               extra-cmake-modules (>= 5.90.0~),
-               kirigami2-dev (>= 5.90.0~),
-               libkf5config-dev (>= 5.90.0~),
-               libkf5iconthemes-dev (>= 5.90.0~),
+               extra-cmake-modules (>= 5.103.0~),
+               kirigami2-dev (>= 5.103.0~),
+               libkf5config-dev (>= 5.103.0~),
+               libkf5iconthemes-dev (>= 5.103.0~),
                libqt5x11extras5-dev (>= 5.15.2~),
                pkg-config,
                pkg-kde-tools (>= 0.15.18~),
                qtbase5-dev (>= 5.15.2~),
                qtdeclarative5-dev (>= 5.15.2~),
                qtquickcontrols2-5-dev (>= 5.15.2~),
-Standards-Version: 4.6.0
+Standards-Version: 4.6.2
 Homepage: https://invent.kde.org/frameworks/qqc2-desktop-style
 Vcs-Browser: https://salsa.debian.org/qt-kde-team/kde/qqc2-desktop-style
 Vcs-Git: https://salsa.debian.org/qt-kde-team/kde/qqc2-desktop-style.git
@@ -29,8 +29,8 @@ Architecture: any
 Depends: qml-module-org-kde-qqc2desktopstyle (= ${binary:Version}),
          ${misc:Depends},
          ${shlibs:Depends},
-Breaks: qml-module-org-kde-qqc2desktopstyle (<< 5.40.0)
-Replaces: qml-module-org-kde-qqc2desktopstyle (<< 5.40.0)
+Breaks: qml-module-org-kde-qqc2desktopstyle (<< 5.40.0),
+Replaces: qml-module-org-kde-qqc2desktopstyle (<< 5.40.0),
 Description: Qt Quick Controls 2: Desktop Style
  Small style written in QML for QtQuickControls2 intended to be used
  by default in QQC2-based apps when used in the Plasma desktop

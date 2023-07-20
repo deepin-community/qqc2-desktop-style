@@ -1,6 +1,7 @@
 /*
     SPDX-FileCopyrightText: 2017 Marco Martin <mart@kde.org>
     SPDX-FileCopyrightText: 2017 The Qt Company Ltd.
+    SPDX-FileCopyrightText: 2023 ivan tkachenko <me@ratijas.tk>
 
     SPDX-License-Identifier: LGPL-3.0-only OR GPL-2.0-or-later
 */
@@ -9,7 +10,7 @@
 import QtQuick 2.6
 import org.kde.qqc2desktopstyle.private 1.0 as StylePrivate
 import org.kde.kirigami 2.4 as Kirigami
-import QtQuick.Templates @QQC2_VERSION@ as T
+import QtQuick.Templates 2.15 as T
 
 T.TabBar {
     id: controlRoot
@@ -31,7 +32,7 @@ T.TabBar {
         model: controlRoot.contentModel
         currentIndex: controlRoot.currentIndex
 
-        spacing: -styleItem.pixelMetric("tabOverlap")-1
+        spacing: -styleItem.pixelMetric("tabOverlap")
         orientation: ListView.Horizontal
         boundsBehavior: Flickable.StopAtBounds
         flickableDirection: Flickable.AutoFlickIfNeeded
@@ -49,7 +50,7 @@ T.TabBar {
         visible: false
         elementType: "tabframe"
         properties: {
-            "orientation" : controlRoot.position == T.TabBar.Header ? "Top" : "Bottom"
+            "orientation": controlRoot.position === T.TabBar.Header ? "Top" : "Bottom"
         }
     }
 
@@ -57,7 +58,7 @@ T.TabBar {
         acceptedButtons: Qt.NoButton
         onWheel: {
             if (wheel.pixelDelta.y < 0 || wheel.angleDelta.y < 0) {
-                controlRoot.currentIndex = Math.min(controlRoot.currentIndex + 1, controlRoot.contentModel.count -1);
+                controlRoot.currentIndex = Math.min(controlRoot.currentIndex + 1, controlRoot.contentModel.count - 1);
             } else {
                 controlRoot.currentIndex = Math.max(controlRoot.currentIndex - 1, 0);
             }

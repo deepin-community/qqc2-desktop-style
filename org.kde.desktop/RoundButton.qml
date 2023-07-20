@@ -7,8 +7,8 @@
 
 import QtQuick 2.6
 import QtQuick.Layouts 1.2
-import QtQuick.Templates @QQC2_VERSION@ as T
-import QtQuick.Controls @QQC2_VERSION@ as Controls
+import QtQuick.Templates 2.15 as T
+import QtQuick.Controls 2.15 as Controls
 import org.kde.qqc2desktopstyle.private 1.0 as StylePrivate
 import org.kde.kirigami 2.16 as Kirigami
 
@@ -40,41 +40,39 @@ T.RoundButton {
     contentItem: GridLayout {
         rowSpacing: controlRoot.spacing
         columnSpacing: controlRoot.spacing
-        flow: iconContent.visible && labelContent.visible && controlRoot.display == T.AbstractButton.TextUnderIcon ? GridLayout.TopToBottom : GridLayout.LeftToRight
+        flow: iconContent.visible && labelContent.visible && controlRoot.display === T.AbstractButton.TextUnderIcon ? GridLayout.TopToBottom : GridLayout.LeftToRight
         Kirigami.Icon {
             id: iconContent
             Layout.alignment: {
                 if (iconContent.visible && labelContent.visible) {
-                    if (controlRoot.display == T.AbstractButton.TextBesideIcon) {
+                    if (controlRoot.display === T.AbstractButton.TextBesideIcon) {
                         return Qt.AlignRight | Qt.AlignVCenter
-                    } else if (controlRoot.display == T.AbstractButton.TextUnderIcon) {
+                    } else if (controlRoot.display === T.AbstractButton.TextUnderIcon) {
                         return Qt.AlignHCenter | Qt.AlignBottom
                     }
-                } else {
-                    return Qt.AlignCenter
                 }
+                return Qt.AlignCenter
             }
             color: controlRoot.icon.color // defaults to Qt::transparent
             implicitWidth: controlRoot.icon.width
             implicitHeight: controlRoot.icon.height
-            visible: source.length > 0 && controlRoot.display != T.AbstractButton.TextOnly
+            visible: source.toString().length > 0 && controlRoot.display !== T.AbstractButton.TextOnly
             source: controlRoot.icon ? (controlRoot.icon.name || controlRoot.icon.source) : ""
         }
         Controls.Label {
             id: labelContent
             Layout.alignment: {
                 if (iconContent.visible && labelContent.visible) {
-                    if (controlRoot.display == T.AbstractButton.TextBesideIcon) {
+                    if (controlRoot.display === T.AbstractButton.TextBesideIcon) {
                         return Qt.AlignLeft | Qt.AlignVCenter
-                    } else if (controlRoot.display == T.AbstractButton.TextUnderIcon) {
+                    } else if (controlRoot.display === T.AbstractButton.TextUnderIcon) {
                         return Qt.AlignHCenter | Qt.AlignTop
                     }
-                } else {
-                    return Qt.AlignCenter
                 }
+                return Qt.AlignCenter
             }
             text: controlRoot.text
-            visible: text.length > 0 && controlRoot.display != T.AbstractButton.IconOnly
+            visible: text.length > 0 && controlRoot.display !== T.AbstractButton.IconOnly
         }
     }
     background: Rectangle {

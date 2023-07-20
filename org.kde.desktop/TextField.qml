@@ -8,8 +8,8 @@
 
 import QtQuick 2.12
 import QtQuick.Window 2.1
-import QtQuick.Controls @QQC2_VERSION@ as Controls
-import QtQuick.Templates @QQC2_VERSION@ as T
+import QtQuick.Controls 2.15 as Controls
+import QtQuick.Templates 2.15 as T
 import org.kde.kirigami 2.4 as Kirigami
 import org.kde.qqc2desktopstyle.private 1.0 as StylePrivate
 import "private" as Private
@@ -28,6 +28,7 @@ T.TextField {
 
     padding: 6
 
+    placeholderTextColor: Kirigami.Theme.disabledTextColor
     color: controlRoot.enabled ? Kirigami.Theme.textColor : Kirigami.Theme.disabledTextColor
     selectionColor: Kirigami.Theme.highlightColor
     selectedTextColor: Kirigami.Theme.highlightedTextColor
@@ -53,22 +54,28 @@ T.TextField {
     }
 
     onTextChanged: Private.MobileTextActionsToolBar.shouldBeVisible = false;
-    
+
     onPressed: Private.MobileTextActionsToolBar.shouldBeVisible = true;
-    
+
     TapHandler {
         acceptedDevices: PointerDevice.Mouse | PointerDevice.Stylus
         acceptedButtons: Qt.LeftButton | Qt.RightButton
-        
+
         // unfortunately, taphandler's pressed event only triggers when the press is lifted
         // we need to use the longpress signal since it triggers when the button is first pressed
         longPressThreshold: 0
         onLongPressed: Private.TextFieldContextMenu.targetClick(point, controlRoot, null, null);
     }
-    
+
     Keys.onPressed: {
         // trigger if context menu button is pressed
         Private.TextFieldContextMenu.targetKeyPressed(event, controlRoot)
+
+        // Disable undo action for security reasons
+        // See QTBUG-103934
+        if (event.matches(StandardKey.Undo)) {
+            event.accepted = true
+        }
     }
 
     onPressAndHold: {
@@ -91,8 +98,8 @@ T.TextField {
         id: placeholder
         x: controlRoot.leftPadding
         y: controlRoot.topPadding
-        width: controlRoot.width - (controlRoot.leftPadding + controlRoot.rightPadding)
-        height: controlRoot.height - (controlRoot.topPadding + controlRoot.bottomPadding)
+        width: controlRoot.width - controlRoot.leftPadding - controlRoot.rightPadding
+        height: controlRoot.height - controlRoot.topPadding - controlRoot.bottomPadding
 
         // Work around Qt bug where NativeRendering breaks for non-integer scale factors
         // https://bugreports.qt.io/browse/QTBUG-67007
@@ -100,16 +107,15 @@ T.TextField {
 
         text: controlRoot.placeholderText
         font: controlRoot.font
-        color: Kirigami.Theme.disabledTextColor
-        horizontalAlignment: controlRoot.horizontalAlignment
+        color: controlRoot.placeholderTextColor
+        LayoutMirroring.enabled: false
+        horizontalAlignment: controlRoot.effectiveHorizontalAlignment
         verticalAlignment: controlRoot.verticalAlignment
         visible: !controlRoot.length && !controlRoot.preeditText && (!controlRoot.activeFocus || controlRoot.horizontalAlignment !== Qt.AlignHCenter)
         elide: Text.ElideRight
     }
 
     background: StylePrivate.StyleItem {
-        id: style
-
         control: controlRoot
         elementType: "edit"
 
