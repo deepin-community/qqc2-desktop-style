@@ -9,7 +9,7 @@ pragma Singleton
 
 import QtQuick 2.6
 import QtQml 2.2
-import QtQuick.Controls @QQC2_VERSION@
+import QtQuick.Controls 2.15
 import org.kde.kirigami 2.5 as Kirigami
 
 Menu {
@@ -168,11 +168,11 @@ Menu {
     }
 
     MenuSeparator {
-        visible: target !== null && !target.readOnly
+        visible: target !== null && !target.readOnly && ((spellcheckhighlighter !== null && spellcheckhighlighter.active && spellcheckhighlighter.wordIsMisspelled) || (spellcheckhighlighterLoader && spellcheckhighlighterLoader.activable))
     }
 
     MenuItem {
-        visible: target !== null && !target.readOnly
+        visible: target !== null && !target.readOnly && !targetIsPassword
         action: Action {
             icon.name: "edit-undo-symbolic"
             text: qsTr("Undo")
@@ -185,7 +185,7 @@ Menu {
         }
     }
     MenuItem {
-        visible: target !== null && !target.readOnly
+        visible: target !== null && !target.readOnly && !targetIsPassword
         action: Action {
             icon.name: "edit-redo-symbolic"
             text: qsTr("Redo")
@@ -198,7 +198,7 @@ Menu {
         }
     }
     MenuSeparator {
-        visible: target !== null && !target.readOnly
+        visible: target !== null && !target.readOnly && !targetIsPassword
     }
     MenuItem {
         visible: target !== null && !target.readOnly && !targetIsPassword

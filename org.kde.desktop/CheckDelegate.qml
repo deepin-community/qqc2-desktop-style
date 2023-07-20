@@ -1,13 +1,14 @@
 /*
     SPDX-FileCopyrightText: 2017 Marco Martin <mart@kde.org>
     SPDX-FileCopyrightText: 2017 The Qt Company Ltd.
+    SPDX-FileCopyrightText: 2023 ivan tkachenko <me@ratijas.tk>
 
     SPDX-License-Identifier: LGPL-3.0-only OR GPL-2.0-or-later
 */
 
 
 import QtQuick 2.5
-import QtQuick.Templates @QQC2_VERSION@ as T
+import QtQuick.Templates 2.15 as T
 import org.kde.kirigami 2.4 as Kirigami
 import "private"
 
@@ -17,19 +18,26 @@ T.CheckDelegate {
     implicitWidth: contentItem.implicitWidth + leftPadding + rightPadding
     implicitHeight: Math.max(contentItem.implicitHeight,
                                       indicator ? indicator.implicitHeight : 0) + topPadding + bottomPadding
+
+    spacing: indicator && typeof indicator.pixelMetric === "function" ? indicator.pixelMetric("checkboxlabelspacing") : Kirigami.Units.smallSpacing
+
     hoverEnabled: true
 
     padding: Kirigami.Settings.tabletMode ? Kirigami.Units.largeSpacing : Kirigami.Units.smallSpacing
 
-    leftPadding: padding*2
     topPadding: padding
-
-    rightPadding: padding*2
+    leftPadding: padding * 2
+    rightPadding: padding * 2
     bottomPadding: padding
 
     contentItem: Label {
-        readonly property int indicatorEffectiveWidth: controlRoot.indicator && typeof controlRoot.indicator.pixelMetric === "function" && controlRoot.icon.name == "" && controlRoot.icon.source == ""
-            ? controlRoot.indicator.pixelMetric("indicatorwidth") + controlRoot.spacing : controlRoot.indicator.width
+        readonly property int indicatorEffectiveWidth: (
+                controlRoot.indicator
+                && typeof controlRoot.indicator.pixelMetric === "function"
+                && controlRoot.icon.name === ""
+                && controlRoot.icon.source.toString() === ""
+            ) ? controlRoot.indicator.pixelMetric("indicatorwidth") + controlRoot.spacing
+              : controlRoot.indicator.width
 
         leftPadding: controlRoot.indicator && !controlRoot.mirrored ? indicatorEffectiveWidth : 0
         rightPadding: controlRoot.indicator && controlRoot.mirrored ? indicatorEffectiveWidth : 0
@@ -44,11 +52,13 @@ T.CheckDelegate {
     }
 
     indicator: CheckIndicator {
-        x: controlRoot.mirrored ? controlRoot.leftPadding : controlRoot.width - width - controlRoot.rightPadding
+        x: controlRoot.mirrored ? controlRoot.width - width - controlRoot.rightPadding : controlRoot.leftPadding
         y: controlRoot.topPadding + (controlRoot.availableHeight - height) / 2
 
         control: controlRoot
     }
 
-    background: DefaultListItemBackground {}
+    background: DefaultListItemBackground {
+        control: controlRoot
+    }
 }

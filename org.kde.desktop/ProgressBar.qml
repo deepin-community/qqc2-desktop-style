@@ -8,7 +8,7 @@
 
 import QtQuick 2.6
 import org.kde.qqc2desktopstyle.private 1.0 as StylePrivate
-import QtQuick.Templates @QQC2_VERSION@ as T
+import QtQuick.Templates 2.15 as T
 import org.kde.kirigami 2.4 as Kirigami
 
 T.ProgressBar {
@@ -22,18 +22,30 @@ T.ProgressBar {
     contentItem: Item {}
 
     background: StylePrivate.StyleItem {
+        // Rescale for extra precision. Adapts to the range of `from` & `to` to avoid integer overflow.
+        property int factor: (Math.abs(controlRoot.from) < 100000 && Math.abs(controlRoot.to) < 100000)
+            ? 10000 : 1
+
         elementType: "progressbar"
         control: controlRoot
-        maximum: indeterminate ? 0 : controlRoot.to*100
-        minimum: indeterminate ? 0 : controlRoot.from*100
-        value: indeterminate ? 0 : ((Qt.application.layoutDirection === Qt.LeftToRight ? controlRoot.visualPosition : 1 - controlRoot.visualPosition)*controlRoot.to*100)
+        maximum: indeterminate ? 0 : factor * controlRoot.to
+        minimum: indeterminate ? 0 : factor * controlRoot.from
+        value: indeterminate ? 0 : factor * controlRoot.value
         horizontal: true
         enabled: controlRoot.enabled
-        Timer {
-            interval: 50
+
+        // TODO KF6: Remove this workaround.
+        // See https://invent.kde.org/frameworks/qqc2-desktop-style/-/merge_requests/179
+        //
+        // ScriptAction refuses to run on its own. So we add a NumberAnimation
+        // with non-zero duration to make it tied to a monitor refresh rate.
+        // See git history for more (e.g. why not PauseAnimation)
+        SequentialAnimation {
             running: controlRoot.indeterminate
-            repeat: true
-            onTriggered: parent.updateItem();
+            loops: Animation.Infinite
+
+            NumberAnimation { duration: 1 }
+            ScriptAction { script: controlRoot.background.updateItem() }
         }
     }
 }

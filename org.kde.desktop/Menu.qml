@@ -1,6 +1,7 @@
 /*
     SPDX-FileCopyrightText: 2017 Marco Martin <mart@kde.org>
     SPDX-FileCopyrightText: 2017 The Qt Company Ltd.
+    SPDX-FileCopyrightText: 2023 ivan tkachenko <me@ratijas.tk>
 
     SPDX-License-Identifier: LGPL-3.0-only OR GPL-2.0-or-later
 */
@@ -8,8 +9,9 @@
 
 import QtQuick 2.7
 import QtQuick.Layouts 1.2
-import QtQuick.Controls @QQC2_VERSION@
-import QtQuick.Templates @QQC2_VERSION@ as T
+import QtQuick.Controls 2.15
+import QtQuick.Templates 2.15 as T
+import org.kde.qqc2desktopstyle.private 1.0 as StylePrivate
 import org.kde.kirigami 2.12 as Kirigami
 
 T.Menu {
@@ -21,6 +23,12 @@ T.Menu {
                              contentItem ? contentItem.implicitHeight : 0) + topPadding + bottomPadding
 
     margins: 0
+    horizontalPadding: style.pixelMetric("menuhmargin")
+    verticalPadding: style.pixelMetric("menuvmargin")
+    StylePrivate.StyleItem {
+        id: style
+        visible: false
+    }
 
     delegate: MenuItem { onImplicitWidthChanged: control.contentItem.contentItem.childrenChanged() }
 
@@ -31,12 +39,15 @@ T.Menu {
         model: control.contentModel
 
         implicitWidth: {
-            var maxWidth = 0;
-            for (var i = 0; i < contentItem.children.length; ++i) {
+            let maxWidth = 0;
+            for (let i = 0; i < contentItem.children.length; ++i) {
                 maxWidth = Math.max(maxWidth, contentItem.children[i].implicitWidth);
             }
             return maxWidth;
         }
+
+        spacing: 0 // Hardcoded to the Breeze theme value
+
         interactive: ApplicationWindow.window ? contentHeight > ApplicationWindow.window.height : false
         clip: true
         currentIndex: control.currentIndex || 0
@@ -48,10 +59,11 @@ T.Menu {
         // mimic qtwidgets behaviour in regards to menu highlighting
         Connections {
             target: control.contentItem.currentItem
+
             function onHoveredChanged() {
-                let currentItem = control.contentItem.currentItem
-                if (currentItem instanceof T.MenuItem && currentItem.highlighted
-                    && !currentItem.subMenu && !currentItem.hovered) {
+                const item = control.contentItem.currentItem;
+                if (item instanceof T.MenuItem && item.highlighted
+                        && !item.subMenu && !item.hovered) {
                     control.currentIndex = -1
                 }
             }
@@ -61,16 +73,22 @@ T.Menu {
     Connections {
         target: control.contentItem.contentItem
 
-        function onChildrenChanged() {
-            for (var i in control.contentItem.contentItem.children) {
-                var child = control.contentItem.contentItem.children[i];
+        function onVisibleChildrenChanged() {
+            const children = control.contentItem.contentItem.visibleChildren;
+            let hasCheckables = control.contentItem.hasCheckables;
+            let hasIcons = control.contentItem.hasIcons;
+            for (let i in children) {
+                const child = children[i];
                 if (child.checkable) {
-                    control.contentItem.hasCheckables = true;
+                    hasCheckables = true;
                 }
-                if (child.icon && child.icon.hasOwnProperty("name") && (child.icon.name.length > 0 || child.icon.source.length > 0)) {
-                    control.contentItem.hasIcons = true;
+                if (child.icon && child.icon.hasOwnProperty("name")
+                        && (child.icon.name !== "" || child.icon.source.toString() !== "")) {
+                    hasIcons = true;
                 }
             }
+            control.contentItem.hasCheckables = hasCheckables;
+            control.contentItem.hasIcons = hasIcons;
         }
     }
 

@@ -1,6 +1,7 @@
 /*
     SPDX-FileCopyrightText: 2017 Marco Martin <mart@kde.org>
     SPDX-FileCopyrightText: 2017 The Qt Company Ltd.
+    SPDX-FileCopyrightText: 2023 ivan tkachenko <me@ratijas.tk>
 
     SPDX-License-Identifier: LGPL-3.0-only OR GPL-2.0-or-later
 */
@@ -8,7 +9,7 @@
 
 import QtQuick 2.6
 import QtQuick.Layouts 1.2
-import QtQuick.Templates @QQC2_VERSION@ as T
+import QtQuick.Templates 2.15 as T
 import org.kde.kirigami 2.4 as Kirigami
 
 T.MenuItem {
@@ -25,7 +26,7 @@ T.MenuItem {
 
     Layout.fillWidth: true
     padding: Kirigami.Units.smallSpacing
-    verticalPadding: Math.floor(Kirigami.Units.smallSpacing * 1.5)
+    verticalPadding: Kirigami.Settings.hasTransientTouchInput ? 8 : 4 // Hardcoded to the Breeze theme value
     hoverEnabled: !Kirigami.Settings.isMobile
 
     Kirigami.MnemonicData.enabled: controlRoot.enabled && controlRoot.visible
@@ -46,14 +47,15 @@ T.MenuItem {
 
     contentItem: RowLayout {
         Item {
-           Layout.preferredWidth: (controlRoot.ListView.view && controlRoot.ListView.view.hasCheckables) || controlRoot.checkable ? controlRoot.indicator.width : Kirigami.Units.smallSpacing
+            Layout.preferredWidth: (controlRoot.ListView.view && controlRoot.ListView.view.hasCheckables) || controlRoot.checkable ? controlRoot.indicator.width : Kirigami.Units.smallSpacing
         }
         Kirigami.Icon {
             Layout.alignment: Qt.AlignVCenter
-            visible: (controlRoot.ListView.view && controlRoot.ListView.view.hasIcons) || (controlRoot.icon != undefined && (controlRoot.icon.name.length > 0 || controlRoot.icon.source.length > 0))
-            source: controlRoot.icon ? (controlRoot.icon.name || controlRoot.icon.source) : ""
-            color: controlRoot.icon ? controlRoot.icon.color : "transparent"
-            Layout.preferredHeight: Math.max(Kirigami.Units.iconSizes.roundedIconSize(label.height), Kirigami.Units.iconSizes.small)
+            visible: (controlRoot.ListView.view && controlRoot.ListView.view.hasIcons)
+                || (controlRoot.icon.name !== "" || controlRoot.icon.source.toString() !== "")
+            source: controlRoot.icon.name !== "" ? controlRoot.icon.name : controlRoot.icon.source
+            color: controlRoot.icon.color
+            Layout.preferredHeight: Kirigami.Settings.hasTransientTouchInput ? Kirigami.Units.iconSizes.smallMedium : Kirigami.Units.iconSizes.small
             Layout.preferredWidth: Layout.preferredHeight
         }
         Label {
@@ -72,13 +74,13 @@ T.MenuItem {
         Label {
             id: shortcut
             Layout.alignment: Qt.AlignVCenter
-            visible: controlRoot.action && controlRoot.action.hasOwnProperty("shortcut") && controlRoot.action.shortcut !== undefined
-            
+            visible: controlRoot.action && controlRoot.action.shortcut !== undefined
+
             Shortcut {
                 id: itemShortcut
                 sequence: (shortcut.visible && controlRoot.action !== null) ? controlRoot.action.shortcut : ""
             }
-            
+
             text: visible ? itemShortcut.nativeText : ""
             font: controlRoot.font
             color: label.color
@@ -86,7 +88,7 @@ T.MenuItem {
             verticalAlignment: Text.AlignVCenter
         }
         Item {
-           Layout.preferredWidth: Kirigami.Units.smallSpacing
+            Layout.preferredWidth: Kirigami.Units.smallSpacing
         }
     }
 
@@ -94,7 +96,7 @@ T.MenuItem {
         x: controlRoot.mirrored ? controlRoot.padding : controlRoot.width - width - controlRoot.padding
         y: controlRoot.topPadding + (controlRoot.availableHeight - height) / 2
         source: controlRoot.mirrored ? "go-next-symbolic-rtl" : "go-next-symbolic"
-        width: Math.max(Kirigami.Units.iconSizes.roundedIconSize(label.height), Kirigami.Units.iconSizes.small)
+        width: Kirigami.Units.iconSizes.small
         height: width
         visible: controlRoot.subMenu
     }

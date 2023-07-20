@@ -9,7 +9,7 @@
 
 import QtQuick 2.12
 import QtQuick.Window 2.1
-import QtQuick.Templates @QQC2_VERSION@ as T
+import QtQuick.Templates 2.15 as T
 import org.kde.kirigami 2.18 as Kirigami
 import org.kde.qqc2desktopstyle.private 1.0 as StylePrivate
 import org.kde.sonnet 1.0 as Sonnet
@@ -33,16 +33,16 @@ T.TextArea {
     selectionColor: Kirigami.Theme.highlightColor
     selectedTextColor: Kirigami.Theme.highlightedTextColor
     wrapMode: Text.WordWrap
-    hoverEnabled: !Kirigami.Settings.tabletMode
+    hoverEnabled: !Kirigami.Settings.tabletMode || !Kirigami.Settings.hasTransientTouchInput
     verticalAlignment: TextEdit.AlignTop
 
     // Work around Qt bug where NativeRendering breaks for non-integer scale factors
     // https://bugreports.qt.io/browse/QTBUG-67007
     renderType: Screen.devicePixelRatio % 1 !== 0 ? Text.QtRendering : Text.NativeRendering
 
-    selectByMouse: !Kirigami.Settings.tabletMode
+    selectByMouse: hoverEnabled
 
-    cursorDelegate: Kirigami.Settings.tabletMode ? mobileCursor : null
+    cursorDelegate: !hoverEnabled ? mobileCursor : null
     Component {
         id: mobileCursor
         Private.MobileCursor {
@@ -78,7 +78,7 @@ T.TextArea {
             selectionStart: controlRoot.selectionStart
             selectionEnd: controlRoot.selectionEnd
             misspelledColor: Kirigami.Theme.negativeTextColor
-            active: activable && settings.checkerEnabledByDefault
+            active: spellcheckhighlighterLoader.activable && settings.checkerEnabledByDefault
 
             onChangeCursorPosition: {
                 controlRoot.cursorPosition = start;
@@ -93,7 +93,7 @@ T.TextArea {
     }
 
     onPressAndHold: {
-        if (!Kirigami.Settings.tabletMode) {
+        if (hoverEnabled) {
             return;
         }
         forceActiveFocus();
@@ -104,7 +104,7 @@ T.TextArea {
     Private.MobileCursor {
         target: controlRoot
         selectionStartHandle: true
-        property var rect: target.positionToRectangle(target.selectionStart)
+        readonly property rect rect: target.positionToRectangle(target.selectionStart)
         x: rect.x
         y: rect.y
     }
@@ -132,7 +132,6 @@ T.TextArea {
     }
 
     background: StylePrivate.StyleItem {
-        id: style
         control: controlRoot
         elementType: "edit"
         implicitWidth: 200

@@ -7,15 +7,18 @@
 
 
 import QtQuick 2.6
-import QtQuick.Templates @QQC2_VERSION@ as T
+import QtQuick.Templates 2.15 as T
 import org.kde.kirigami 2.4 as Kirigami
 
-T.CheckBox {
+T.Switch {
     id: control
 
-    implicitWidth: contentItem.implicitWidth + leftPadding + rightPadding
-    implicitHeight: Math.max(contentItem.implicitHeight,
-                                      indicator ? indicator.implicitHeight : 0) + topPadding + bottomPadding
+    implicitWidth: Math.max(implicitBackgroundWidth + leftInset + rightInset,
+                            implicitContentWidth + leftPadding + rightPadding,
+                            implicitIndicatorWidth + leftPadding + rightPadding)
+    implicitHeight: Math.max(implicitBackgroundHeight + topInset + bottomInset,
+                             implicitContentHeight + topPadding + bottomPadding,
+                             implicitIndicatorHeight + topPadding + bottomPadding)
     baselineOffset: contentItem.y + contentItem.baselineOffset
 
     padding: 1
@@ -24,12 +27,18 @@ T.CheckBox {
     hoverEnabled: true
 
     indicator: SwitchIndicator {
-        LayoutMirroring.enabled: control.mirrored
-        LayoutMirroring.childrenInherit: true
-        height: 22
-        anchors {
-            left: parent.left
-            verticalCenter: parent.verticalCenter
+        x: if (control.contentItem !== null && control.contentItem.width > 0) {
+            return control.mirrored ?
+                control.width - width - control.rightPadding : control.leftPadding
+        } else {
+            return control.leftPadding + (control.availableWidth - width) / 2
+        }
+        y: if (control.contentItem !== null
+            && (control.contentItem instanceof Text || control.contentItem instanceof TextEdit)
+            && control.contentItem.lineCount > 1) {
+            return control.topPadding
+        } else {
+            return control.topPadding + Math.round((control.availableHeight - height) / 2)
         }
         control: control
     }
@@ -45,6 +54,11 @@ T.CheckBox {
     }
 
     contentItem: Label {
+        property FontMetrics fontMetrics: FontMetrics {}
+        // Ensure consistent vertical position relative to indicator with multiple lines.
+        // No need to round because .5 from the top will add with .5 from the bottom becoming 1.
+        topPadding: Math.max(0, (control.implicitIndicatorHeight - fontMetrics.height) / 2)
+        bottomPadding: topPadding
         leftPadding: control.indicator && !control.mirrored ? control.indicator.width + control.spacing : 0
         rightPadding: control.indicator && control.mirrored ? control.indicator.width + control.spacing : 0
         opacity: control.enabled ? 1 : 0.6

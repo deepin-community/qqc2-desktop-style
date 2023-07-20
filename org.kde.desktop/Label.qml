@@ -8,7 +8,7 @@
 
 import QtQuick 2.15
 import QtQuick.Window 2.2
-import QtQuick.Templates @QQC2_VERSION@ as T
+import QtQuick.Templates 2.15 as T
 import org.kde.qqc2desktopstyle.private 1.0 as StylePrivate
 import org.kde.kirigami 2.4 as Kirigami
 
@@ -26,7 +26,13 @@ T.Label {
     renderType: Screen.devicePixelRatio % 1 !== 0 ? Text.QtRendering : Text.NativeRendering
 
     HoverHandler {
-        cursorShape: parent.hoveredLink ? Qt.PointingHandCursor : Qt.ArrowCursor
+        // By default HoverHandler accepts the left button while it shouldn't accept anything,
+        // causing https://bugreports.qt.io/browse/QTBUG-106489.
+        // Qt.NoButton unfortunately is not a valid value for acceptedButtons.
+        // Disabling masks the problem, but
+        // there is no proper workaround other than an upstream fix
+        enabled: false
+        cursorShape: parent.hoveredLink ? Qt.PointingHandCursor : undefined
     }
 
     color: Kirigami.Theme.textColor

@@ -7,8 +7,8 @@
 
 
 import QtQuick 2.6
-import QtQuick.Controls @QQC2_VERSION@
-import QtQuick.Templates @QQC2_VERSION@ as T
+import QtQuick.Controls 2.15
+import QtQuick.Templates 2.15 as T
 import org.kde.kirigami 2.4 as Kirigami
 
 T.Drawer {
@@ -32,9 +32,9 @@ T.Drawer {
         Rectangle {
             readonly property bool horizontal: control.edge === Qt.LeftEdge || control.edge === Qt.RightEdge
             anchors {
+               top: control.edge !== Qt.TopEdge ? parent.top : undefined
                left: control.edge !== Qt.LeftEdge ? parent.left : undefined
                right: control.edge !== Qt.RightEdge ? parent.right : undefined
-               top: control.edge !== Qt.TopEdge ? parent.top : undefined
                bottom: control.edge !== Qt.BottomEdge ? parent.bottom : undefined
             }
             color: Kirigami.Theme.textColor

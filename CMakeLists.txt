@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.16)
 
-set(KF_VERSION "5.90.0") # handled by release scripts
-set(KF_DEP_VERSION "5.90.0") # handled by release scripts
+set(KF_VERSION "5.103.0") # handled by release scripts
+set(KF_DEP_VERSION "5.103.0") # handled by release scripts
 
 project(qqc2-desktop-style VERSION ${KF_VERSION})
 
@@ -21,20 +21,22 @@ include(FeatureSummary)
 
 ################# set KDE specific information #################
 
-find_package(ECM 5.90.0 REQUIRED NO_MODULE)
+find_package(ECM 5.103.0 REQUIRED NO_MODULE)
 
 # where to look first for cmake modules, before ${CMAKE_ROOT}/Modules/ is checked
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${ECM_MODULE_PATH})
 
 include(ECMSetupVersion)
 include(ECMGenerateHeaders)
+include(ECMQmlModule)
 include(ECMQMLModules)
 include(KDEInstallDirs)
 include(KDECMakeSettings)
 include(KDEGitCommitHooks)
 include(KDEFrameworkCompilerSettings NO_POLICY_SCOPE)
+include(ECMDeprecationSettings)
 
-find_package(Qt5 ${REQUIRED_QT_VERSION} REQUIRED NO_MODULE COMPONENTS Core Quick Gui Widgets QuickControls2 DBus)
+find_package(Qt${QT_MAJOR_VERSION} ${REQUIRED_QT_VERSION} REQUIRED NO_MODULE COMPONENTS Core Quick Gui Widgets QuickControls2 DBus)
 
 find_package(KF5 ${KF_DEP_VERSION} REQUIRED COMPONENTS Config Kirigami2)
 
@@ -50,7 +52,9 @@ endif()
 # to the linker, in that case, it requires to have the proper variables
 # to exists.
 if(X11_FOUND)
-    find_package(Qt5X11Extras ${REQUIRED_QT_VERSION} NO_MODULE QUIET)
+    if (QT_MAJOR_VERSION STREQUAL "5")
+        find_package(Qt5X11Extras ${REQUIRED_QT_VERSION} NO_MODULE)
+    endif()
 endif()
 
 set_package_properties(IconThemes PROPERTIES DESCRIPTION "KF5 IconThemes framework"
@@ -112,39 +116,27 @@ ecm_setup_version(PROJECT
     SOVERSION 5)
 
 #########################################################################
-add_definitions(-DQT_DISABLE_DEPRECATED_BEFORE=0x050f02)
-add_definitions(-DKF_DISABLE_DEPRECATED_BEFORE_AND_AT=0x055100)
+ecm_set_disabled_deprecation_versions(
+    QT 5.15.2
+    KF 5.95
+)
+
 add_subdirectory(plugin)
 
 if (KF5IconThemes_FOUND AND KF5WidgetsAddons_FOUND)
 add_subdirectory(kirigami-plasmadesktop-integration)
 endif(KF5IconThemes_FOUND AND KF5WidgetsAddons_FOUND)
 
-# FIXME: this assumes there will always be a QQC2 release for each Qt release, needs
-# something to discover what's the latest qqc2 version available
-# Since 5.12, QQC2 version is sync with Qt's minor version:
-# https://github.com/qt/qtquickcontrols2/commit/3c7bfc156797b2f3ef08a8cf620b79da80e4b061
-if (Qt5QuickControls2_VERSION_MINOR LESS 12)
-    math(EXPR QQC2_VERSION_MINOR "${Qt5QuickControls2_VERSION_MINOR} - 7")
+if (QT_MAJOR_VERSION EQUAL "5")
+  install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/org.kde.desktop DESTINATION ${KDE_INSTALL_QMLDIR}/QtQuick/Controls.2)
 else()
-    set(QQC2_VERSION_MINOR "${Qt5QuickControls2_VERSION_MINOR}")
+  ecm_add_qml_module(org_kde_desktop URI "org.kde.desktop" VERSION 1.0 NO_PLUGIN)
+  file(GLOB _public_qml "org.kde.desktop/*.qml")
+  ecm_target_qml_sources(org_kde_desktop VERSION 1.0 SOURCES ${_public_qml})
+  file(GLOB _private_qml "org.kde.desktop/private/*.qml")
+  ecm_target_qml_sources(org_kde_desktop VERSION 1.0 PATH private SOURCES ${_private_qml})
+  ecm_finalize_qml_module(org_kde_desktop DESTINATION ${KDE_INSTALL_QMLDIR})
 endif()
-set(QQC2_VERSION "2.${QQC2_VERSION_MINOR}")
-
-# Find all the source qml files
-FILE(GLOB_RECURSE inFiles RELATIVE "${CMAKE_CURRENT_SOURCE_DIR}"
-    "${CMAKE_CURRENT_SOURCE_DIR}/org.kde.desktop/*")
-
-    #for each file, replace @QQC2_VERSION@ with the version we found
-FOREACH(infileName ${inFiles})
-    configure_file(
-        "${CMAKE_CURRENT_SOURCE_DIR}/${infileName}"
-        "${CMAKE_CURRENT_BINARY_DIR}/${infileName}"
-        @ONLY
-    )
-ENDFOREACH(infileName)
-
-install(DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/org.kde.desktop DESTINATION ${KDE_INSTALL_QMLDIR}/QtQuick/Controls.2)
 
 feature_summary(WHAT ALL INCLUDE_QUIET_PACKAGES FATAL_ON_MISSING_REQUIRED_PACKAGES)
 

@@ -1,6 +1,7 @@
 /*
     SPDX-FileCopyrightText: 2017 Marco Martin <mart@kde.org>
     SPDX-FileCopyrightText: 2017 The Qt Company Ltd.
+    SPDX-FileCopyrightText: 2023 ivan tkachenko <me@ratijas.tk>
 
     SPDX-License-Identifier: LGPL-3.0-only OR GPL-2.0-or-later
 */
@@ -9,9 +10,9 @@
 import QtQuick 2.6
 import QtQml.Models 2.1
 //for TabBar.*
-import QtQuick.Controls @QQC2_VERSION@
+import QtQuick.Controls 2.15
 import org.kde.qqc2desktopstyle.private 1.0 as StylePrivate
-import QtQuick.Templates @QQC2_VERSION@ as T
+import QtQuick.Templates 2.15 as T
 import org.kde.kirigami 2.4 as Kirigami
 
 T.TabButton {
@@ -61,20 +62,43 @@ T.TabButton {
         anchors.fill: parent
         elementType: "tab"
         paintMargins: 0
-        property Item tabBar: controlRoot.parent.parent.parent
 
-        property string orientation: tabBar.position == TabBar.Header ? "Top" : "Bottom"
-        property string selectedpos: tabBar.currentIndex == controlRoot.ObjectModel.index + 1 ? "next" :
-                                    tabBar.currentIndex == controlRoot.ObjectModel.index - 1 ? "previous" : ""
-        property string tabpos: tabBar.count === 1 ? "only" : controlRoot.ObjectModel.index === 0 ? "beginning" : controlRoot.ObjectModel.index === tabBar.count - 1 ? "end" : "middle"
+        readonly property TabBar tabBar: controlRoot.TabBar.tabBar
+
+        property string orientation: controlRoot.TabBar.position === TabBar.Header ? "Top" : "Bottom"
+        property string selectedpos: {
+            if (tabBar) {
+                switch (tabBar.currentIndex) {
+                case (controlRoot.TabBar.index + 1): return "next";
+                case (controlRoot.TabBar.index - 1): return "previous";
+                }
+            }
+            return "";
+        }
+        property string tabpos: {
+            if (tabBar) {
+                if (tabBar.count === 1) {
+                    return "only";
+                }
+                switch (controlRoot.TabBar.index) {
+                case 0: return "beginning";
+                case (tabBar.count - 1): return "end";
+                }
+            }
+            return "middle";
+        }
 
         properties: {
+            "icon": controlRoot.display !== T.AbstractButton.TextOnly
+                ? (controlRoot.icon.name !== "" ? controlRoot.icon.name : controlRoot.icon.source) : null,
+            "iconColor": Qt.colorEqual(controlRoot.icon.color, "transparent") ? Kirigami.Theme.textColor : controlRoot.icon.color,
+            "iconWidth": controlRoot.icon.width,
+            "iconHeight": controlRoot.icon.height,
+
             "hasFrame" : true,
             "orientation": orientation,
             "tabpos": tabpos,
             "selectedpos": selectedpos,
-            "icon": control.icon ? (control.icon.name || control.icon.source) : "",
-            "iconColor": controlRoot.icon && controlRoot.icon.color.a > 0? controlRoot.icon.color : Kirigami.Theme.textColor
         }
 
         enabled: controlRoot.enabled

@@ -7,12 +7,13 @@
 
 
 import QtQuick 2.6
-import QtQuick.Controls @QQC2_VERSION@ as Controls
-import QtQuick.Templates @QQC2_VERSION@ as T
+import QtQuick.Controls 2.15 as Controls
+import QtQuick.Templates 2.15 as T
+import QtQuick.Layouts 1.15
 import org.kde.kirigami 2.12 as Kirigami
 
 T.ToolTip {
-    id: controlRoot
+    id: control
 
     Kirigami.Theme.colorSet: Kirigami.Theme.Tooltip
     Kirigami.Theme.inherit: false
@@ -31,19 +32,52 @@ T.ToolTip {
     margins: 6
     padding: 6
 
-    visible: parent && (Kirigami.Settings.tabletMode ? parent.pressed : (parent.hasOwnProperty("hovered") ? parent.hovered : parent.hasOwnProperty("containsMouse") && parent.containsMouse))
+    visible: parent && text.length > 0 && (Kirigami.Settings.tabletMode ? parent.pressed : (parent.hasOwnProperty("hovered") ? parent.hovered : parent.hasOwnProperty("containsMouse") && parent.containsMouse))
     delay: Kirigami.Settings.tabletMode ? Qt.styleHints.mousePressAndHoldInterval : Kirigami.Units.toolTipDelay
-    // Timeout based on text length, from QTipLabel::restartExpireTimer
-    timeout: 10000 + 40 * Math.max(0, text.length - 100)
+    // Never time out while being hovered; it's annoying
+    timeout: -1
 
     closePolicy: T.Popup.CloseOnEscape | T.Popup.CloseOnPressOutsideParent | T.Popup.CloseOnReleaseOutsideParent
 
-    contentItem: Controls.Label {
-        text: controlRoot.text
-        wrapMode: Text.WordWrap
-        font: controlRoot.font
-        Kirigami.Theme.colorSet: Kirigami.Theme.Tooltip
-        color: Kirigami.Theme.textColor
+    enter: Transition {
+        NumberAnimation {
+            property: "opacity"
+            from: 0.0
+            to: 1.0
+            duration: Kirigami.Units.longDuration
+            easing.type: Easing.OutCubic
+        }
+    }
+
+    exit: Transition {
+        NumberAnimation {
+            property: "opacity"
+            from: 1.0
+            to: 0.0
+            duration: Kirigami.Units.longDuration
+            easing.type: Easing.OutCubic
+        }
+    }
+
+    // FIXME: use a top-level Item here so that ToolTip instances with child
+    // items can safely use anchors
+    contentItem: RowLayout {
+        Controls.Label {
+            // Strip out ampersands right before non-whitespace characters, i.e.
+            // those used to determine the alt key shortcut
+            // (except when the word ends in ; (HTML entities))
+            text: control.text.replace(/(&)(?!;)\S+(?>\s)/g, "")
+            // Using Wrap instead of WordWrap to prevent tooltips with long URLs
+            // from overflowing
+            wrapMode: Text.Wrap
+            font: control.font
+            color: Kirigami.Theme.textColor
+
+            Kirigami.Theme.colorSet: Kirigami.Theme.Tooltip
+            Layout.fillWidth: true
+            // This value is basically arbitrary. It just looks nice.
+            Layout.maximumWidth: Kirigami.Units.gridUnit * 14
+        }
     }
 
     // TODO: Consider replacing this with a StyleItem
